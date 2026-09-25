@@ -28,6 +28,7 @@ private:
 
 public:
     World(int size);
+    void printWorld() const;
 };
 
 

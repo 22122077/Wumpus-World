@@ -23,5 +23,7 @@ int main() {
 
     World world(n);
 
+    world.printWorld();
+
     return 0;
 }
