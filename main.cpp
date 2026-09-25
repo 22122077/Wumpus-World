@@ -1,17 +1,6 @@
 #include <iostream>
-
+#include "World.h"
 using namespace std;
-
-struct Position {
-    int x;
-    int y;
-};
-
-struct Cell {
-    bool hasPit = false;
-    bool hasWumpus = false;
-    bool hasGold = false;
-};
 
 enum class Direction {
     North,
@@ -27,6 +16,12 @@ int main() {
 
     cout << "[" << start.x << "," << start.y << "]" << endl;
     cout << cell.hasPit << endl;
+
+    int n;
+    cout << "Enter world size: ";
+    cin >> n;
+
+    World world(n);
 
     return 0;
 }
