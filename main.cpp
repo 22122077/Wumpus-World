@@ -14,15 +14,13 @@ int main() {
     Cell cell;
     Direction startDirection = Direction::East;
 
-    cout << "[" << start.x << "," << start.y << "]" << endl;
-    cout << cell.hasPit << endl;
-
     int n;
     cout << "Enter world size: ";
     cin >> n;
 
     World world(n);
 
+    world.placeGold({2,2});
     world.printWorld();
 
     return 0;

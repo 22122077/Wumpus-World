@@ -24,11 +24,12 @@ class World {
 
 private:
     int n;
-    vector<vector<Cell>> grid;
+    vector<vector<Cell>> grid; //grid[x][y]
 
 public:
     World(int size);
     void printWorld() const;
+    void placeGold(Position position);
 };
 
 
