@@ -28,6 +28,10 @@ class World {
         bool isProtectedStartSquare(Position position) const;
         Position randPosition();
         mt19937 gen;
+        bool isInsideWorld(Position position) const;
+        vector<Position> getNeighbors(Position position) const;
+        bool hasBreeze(Position position) const;
+        bool hasStench(Position position) const;
 
     public:
         World(int size);

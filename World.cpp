@@ -100,3 +100,56 @@ Position World::randPosition() {
 
     return pos;
 }
+
+bool World::isInsideWorld(Position position) const {
+    return  position.x >= 1 && position.x <= n &&
+            position.y >= 1 && position.y <= n;
+}
+
+vector<Position> World::getNeighbors(Position position) const {
+    vector<Position> neighbors;
+
+    Position left{position.x - 1, position.y};
+    Position right{position.x + 1, position.y};
+    Position top{position.x, position.y + 1};
+    Position bottom{position.x, position.y - 1};
+
+    if (isInsideWorld(left)) {
+        neighbors.push_back(left);
+    }
+    if (isInsideWorld(right)) {
+        neighbors.push_back(right);
+    }
+    if (isInsideWorld(top)) {
+        neighbors.push_back(top);
+    }
+    if (isInsideWorld(bottom)) {
+        neighbors.push_back(bottom);
+    }
+
+    return neighbors;
+}
+
+bool World::hasBreeze(Position position) const {
+    vector<Position> neighbors = getNeighbors(position);
+
+    for (Position neighbor : neighbors) {
+        if (grid[neighbor.x - 1][neighbor.y -1].hasPit) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+bool World::hasStench(Position position) const {
+    vector<Position> neighbors = getNeighbors(position);
+
+    for (Position neighbor : neighbors) {
+        if (grid[neighbor.x - 1][neighbor.y -1].hasWumpus) {
+            return true;
+        }
+    }
+
+    return false;
+}
