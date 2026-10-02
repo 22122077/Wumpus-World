@@ -22,6 +22,7 @@ int main() {
 
     world.placeWumpus();
     world.placeGold();
+    world.placePits();
     world.printWorld();
 
     return 0;

@@ -21,11 +21,17 @@ void World::printWorld() const {
             if (cell.hasGold && cell.hasWumpus) {
                 cout << "GW ";
             }
+            else if (cell.hasWumpus && cell.hasPit) {
+                cout << "WP ";
+            }
             else if (cell.hasGold) {
                 cout << "G  ";
             }
             else if (cell.hasWumpus) {
                 cout << "W  ";
+            }
+            else if (cell.hasPit) {
+                cout << "P  ";
             }
             else {
                 cout << ".  ";
@@ -64,6 +70,24 @@ void World::placeWumpus() {
 
     grid[position.x - 1][position.y - 1].hasWumpus = true;
 
+}
+
+void World::placePits() {
+    bernoulli_distribution pitChance(0.2);
+
+    for (int x = 0; x < n; x++) {
+        for (int y = 0; y < n; y++) {
+            Position position{x + 1, y + 1};
+
+            if (isProtectedStartSquare(position) || (grid[x][y].hasGold) ){
+                continue;
+            }
+
+            if (pitChance(gen)) {
+                grid[x][y].hasPit = true;
+            }
+        }
+    }
 }
 
 Position World::randPosition() {

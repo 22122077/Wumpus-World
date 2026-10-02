@@ -34,6 +34,7 @@ class World {
         void printWorld() const;
         void placeGold();
         void placeWumpus();
+        void placePits();
 };
 
 
