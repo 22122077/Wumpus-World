@@ -20,7 +20,8 @@ int main() {
 
     World world(n);
 
-    world.placeGold({2,2});
+    world.placeWumpus();
+    world.placeGold();
     world.printWorld();
 
     return 0;

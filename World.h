@@ -2,12 +2,12 @@
 // Created by Mina Armijo on 9/25/26.
 //
 
-#pragma once
-#include <vector>
-using namespace std;
-
 #ifndef WORLD_H
 #define WORLD_H
+
+#include <vector>
+#include <random>
+using namespace std;
 
 struct Position {
     int x;
@@ -22,14 +22,18 @@ struct Cell {
 
 class World {
 
-private:
-    int n;
-    vector<vector<Cell>> grid; //grid[x][y]
+    private:
+        int n;
+        vector<vector<Cell>> grid; //grid[x][y]
+        bool isProtectedStartSquare(Position position) const;
+        Position randPosition();
+        mt19937 gen;
 
-public:
-    World(int size);
-    void printWorld() const;
-    void placeGold(Position position);
+    public:
+        World(int size);
+        void printWorld() const;
+        void placeGold();
+        void placeWumpus();
 };
 
 
