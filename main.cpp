@@ -2,13 +2,6 @@
 #include "World.h"
 using namespace std;
 
-enum class Direction {
-    North,
-    East,
-    South,
-    West
-};
-
 int main() {
     Position start{1, 1};
     Cell cell;
@@ -24,6 +17,16 @@ int main() {
     world.placeGold();
     world.placePits();
     world.printWorld();
+
+    Position position{1, 1};
+    Direction direction = Direction::West;
+
+    bool moved = world.moveForward(position, direction);
+
+    Percept percept = world.getPercept(position, !moved, false);
+
+    cout << "Position: [" << position.x << "," << position.y << "]" << endl;
+    cout << "Bump: " << percept.bump << endl;
 
     return 0;
 }

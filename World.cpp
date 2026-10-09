@@ -154,12 +154,45 @@ bool World::hasStench(Position position) const {
     return false;
 }
 
-Percept World::getPercept(Position position) const {
+Percept World::getPercept(Position position, bool bump, bool scream) const {
     Percept percept;
 
     percept.stench = hasStench(position);
     percept.breeze = hasBreeze(position);
     percept.glitter = grid[position.x - 1][position.y].hasGold;
+    percept.bump = bump;
+    percept.scream = scream;
 
     return percept;
 }
+
+Position World::getForwardPosition(Position position, Direction direction) const {
+    switch (direction) {
+        case Direction::North:
+            position.y += 1;
+            break;
+
+        case Direction::East:
+            position.x += 1;
+            break;
+        case Direction::South:
+            position.y -= 1;
+            break;
+        case Direction::West:
+            position.x -= 1;
+            break;
+    }
+    return position;
+}
+
+bool World::moveForward(Position& position, Direction direction) const {
+    Position attemptedPosition = getForwardPosition(position, direction);
+
+    if (!isInsideWorld(attemptedPosition)) {
+        return false;
+    }
+
+    position = attemptedPosition;
+    return true;
+}
+

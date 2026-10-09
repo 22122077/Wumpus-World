@@ -14,6 +14,13 @@ struct Position {
     int y;
 };
 
+enum class Direction {
+    North,
+    East,
+    South,
+    West
+};
+
 struct Cell {
     bool hasPit = false;
     bool hasWumpus = false;
@@ -40,6 +47,7 @@ class World {
         vector<Position> getNeighbors(Position position) const;
         bool hasBreeze(Position position) const;
         bool hasStench(Position position) const;
+        Position getForwardPosition(Position position, Direction direction) const;
 
     public:
         World(int size);
@@ -47,7 +55,8 @@ class World {
         void placeGold();
         void placeWumpus();
         void placePits();
-        Percept getPercept(Position position) const;
+        Percept getPercept(Position position, bool bump, bool scream) const;
+        bool moveForward(Position& position, Direction direction) const;
 };
 
 
