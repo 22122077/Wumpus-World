@@ -20,6 +20,14 @@ struct Cell {
     bool hasGold = false;
 };
 
+struct Percept {
+    bool stench = false;
+    bool breeze = false;
+    bool glitter = false;
+    bool bump = false;
+    bool scream = false;
+};
+
 class World {
 
     private:
@@ -39,6 +47,7 @@ class World {
         void placeGold();
         void placeWumpus();
         void placePits();
+        Percept getPercept(Position position) const;
 };
 
 

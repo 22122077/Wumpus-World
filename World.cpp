@@ -153,3 +153,13 @@ bool World::hasStench(Position position) const {
 
     return false;
 }
+
+Percept World::getPercept(Position position) const {
+    Percept percept;
+
+    percept.stench = hasStench(position);
+    percept.breeze = hasBreeze(position);
+    percept.glitter = grid[position.x - 1][position.y].hasGold;
+
+    return percept;
+}
