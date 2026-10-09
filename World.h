@@ -57,6 +57,7 @@ class World {
         void placePits();
         Percept getPercept(Position position, bool bump, bool scream) const;
         bool moveForward(Position& position, Direction direction) const;
+        bool grabGold(Position position);
 };
 
 

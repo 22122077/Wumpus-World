@@ -196,3 +196,13 @@ bool World::moveForward(Position& position, Direction direction) const {
     return true;
 }
 
+bool World::grabGold(Position position) {
+    Cell& cell = grid[position.x - 1][position.y - 1];
+
+    if (!cell.hasGold) {
+        return false;
+    }
+
+    cell.hasGold = false; //after gold is grabbed
+    return true;
+}
