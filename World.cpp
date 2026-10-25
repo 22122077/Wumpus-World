@@ -222,3 +222,10 @@ bool World::shoot(Position position, Direction direction) {
     return false;
 }
 
+bool World::isDeadly(Position position) const {
+    const Cell& cell = grid[position.x - 1][position.y - 1];
+
+    return cell.hasPit || (cell.hasWumpus && wumpusAlive);
+}
+
+
