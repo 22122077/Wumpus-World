@@ -48,9 +48,11 @@ class World {
         bool hasBreeze(Position position) const;
         bool hasStench(Position position) const;
         Position getForwardPosition(Position position, Direction direction) const;
+        bool wumpusAlive = false;
+
 
     public:
-        World(int size);
+        explicit World(int size);
         void printWorld() const;
         void placeGold();
         void placeWumpus();
@@ -58,6 +60,7 @@ class World {
         Percept getPercept(Position position, bool bump, bool scream) const;
         bool moveForward(Position& position, Direction direction) const;
         bool grabGold(Position position);
+        bool shoot(Position position, Direction direction);
 };
 
 

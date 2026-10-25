@@ -3,10 +3,6 @@
 using namespace std;
 
 int main() {
-    Position start{1, 1};
-    Cell cell;
-    Direction startDirection = Direction::East;
-
     int n;
     cout << "Enter world size: ";
     cin >> n;

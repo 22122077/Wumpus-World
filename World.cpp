@@ -69,6 +69,7 @@ void World::placeWumpus() {
     while (isProtectedStartSquare(position));
 
     grid[position.x - 1][position.y - 1].hasWumpus = true;
+    wumpusAlive = true;
 
 }
 
@@ -159,7 +160,7 @@ Percept World::getPercept(Position position, bool bump, bool scream) const {
 
     percept.stench = hasStench(position);
     percept.breeze = hasBreeze(position);
-    percept.glitter = grid[position.x - 1][position.y].hasGold;
+    percept.glitter = grid[position.x - 1][position.y - 1].hasGold;
     percept.bump = bump;
     percept.scream = scream;
 
@@ -206,3 +207,18 @@ bool World::grabGold(Position position) {
     cell.hasGold = false; //after gold is grabbed
     return true;
 }
+
+bool World::shoot(Position position, Direction direction) {
+    Position arrowPosition = getForwardPosition(position, direction);
+
+    while (isInsideWorld(arrowPosition)) {
+        Cell& cell = grid[arrowPosition.x - 1][arrowPosition.y - 1];
+        if (cell.hasWumpus && wumpusAlive) {
+            wumpusAlive = false;
+            return true;
+        }
+        arrowPosition = getForwardPosition(arrowPosition, direction);
+    }
+    return false;
+}
+
