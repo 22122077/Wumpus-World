@@ -228,4 +228,9 @@ bool World::isDeadly(Position position) const {
     return cell.hasPit || (cell.hasWumpus && wumpusAlive);
 }
 
+bool World::canClimb(Position position) const {
+    return position.x == 1 && position.y == 1;
+}
+
+
 

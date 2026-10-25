@@ -62,6 +62,7 @@ class World {
         bool grabGold(Position position);
         bool shoot(Position position, Direction direction);
         bool isDeadly(Position position) const;
+        bool canClimb(Position position) const;
 };
 
 
