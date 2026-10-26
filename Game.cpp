@@ -5,7 +5,7 @@
 #include "Game.h"
 
 
-ActionResult executeAction(Action action, Agent& agent, World& world) {
+ActionResult Game::executeAction(Action action, Agent& agent, World& world) {
     ActionResult result;
 
     agent.updateScore(-1);
