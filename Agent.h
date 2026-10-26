@@ -6,17 +6,20 @@
 #define AGENT_H
 
 #include "World.h"
+#include "KnowledgeBase.h"
 
 class Agent {
     private:
-        Position position{1, 1};
-        Direction direction = Direction::East;
-        bool hasArrow = true;
-        bool hasGold = false;
-        bool alive = true;
-        int score = 0;
+    Position position{1, 1};
+    Direction direction = Direction::East;
+    bool hasArrow = true;
+    bool hasGold = false;
+    bool alive = true;
+    int score = 0;
+    KnowledgeBase knowledgeBase;
 
     public:
+    explicit Agent(int worldSize);
     Position getPosition() const;
     Direction getDirection() const;
     bool isAlive() const;
@@ -31,6 +34,8 @@ class Agent {
     bool shoot(World& world);
     bool climb(World& world) const;
     void updateScore(int amount);
+    InferenceResult processPercept(Percept percept);
+    bool knows(Proposition proposition) const;
 };
 
 #endif //AGENT_H

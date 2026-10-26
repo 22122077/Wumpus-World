@@ -28,6 +28,39 @@ bool Agent::hasGoldCollected() const {
     return hasGold;
 }
 
+Agent::Agent(int worldSize)
+    : knowledgeBase(worldSize) {
+
+    knowledgeBase.markVisited(position);
+    knowledgeBase.markSafe(position);
+}
+
+InferenceResult Agent::processPercept(Percept percept) {
+    if (percept.scream) {
+        knowledgeBase.markWumpusDead();
+    }
+
+    InferenceResult result = knowledgeBase.markVisited(position);
+
+    if (result == InferenceResult::Contradiction) {
+        return InferenceResult::Contradiction;
+    }
+
+    result = knowledgeBase.markSafe(position);
+
+    if (result == InferenceResult::Contradiction) {
+        return InferenceResult::Contradiction;
+    }
+
+    result = knowledgeBase.addPerceptFacts(percept, position);
+
+    if (result == InferenceResult::Contradiction) {
+        return InferenceResult::Contradiction;
+    }
+
+    return knowledgeBase.runInference();
+}
+
 void Agent::turnLeft() {
     switch (direction) {
         case Direction::North:
@@ -102,5 +135,7 @@ void Agent::updateScore(int amount) {
     score += amount;
 }
 
-
+bool Agent::knows(Proposition proposition) const {
+    return knowledgeBase.containsProposition(proposition);
+}
 

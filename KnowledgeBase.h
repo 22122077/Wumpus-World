@@ -51,6 +51,8 @@ class KnowledgeBase {
     InferenceResult addOrSentence(const OrSentence& sentence);
     InferenceResult simplifyOrSentence(OrSentence& sentence);
     InferenceResult simplifyOrSentences();
+    bool wumpusAlive = true;
+    InferenceResult inferUniqueWumpus();
 
 
     public:
@@ -61,6 +63,7 @@ class KnowledgeBase {
     InferenceResult markVisited(Position position);
     InferenceResult markSafe(Position position);
     InferenceResult runInference();
+    void markWumpusDead();
 };
 
 #endif //KNOWLEDGEBASE_H

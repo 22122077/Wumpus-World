@@ -78,6 +78,17 @@ InferenceResult KnowledgeBase::runInference() {
             }
         }
 
+        InferenceResult uniqueWumpusResult = inferUniqueWumpus();
+
+        if (uniqueWumpusResult == InferenceResult::Contradiction) {
+            return InferenceResult::Contradiction;
+        }
+
+        if (uniqueWumpusResult == InferenceResult::Changed) {
+            passChanged = true;
+            anyChange = true;
+        }
+
         InferenceResult simplifyResult = simplifyOrSentences();
 
         if (simplifyResult == InferenceResult::Contradiction) {
@@ -305,10 +316,13 @@ InferenceResult KnowledgeBase::inferSafe(Position position) {
         true
     };
 
-    if (!containsProposition(noPit) ||
-        !containsProposition(noWumpus)) {
+    if (!containsProposition(noPit)) {
         return InferenceResult::NotApplicable;
-        }
+    }
+
+    if (wumpusAlive && !containsProposition(noWumpus)) {
+        return InferenceResult::NotApplicable;
+    }
 
     Proposition safe{
         PropositionType::Safe,
@@ -569,4 +583,66 @@ InferenceResult KnowledgeBase::inferFromStench(Position position) {
     };
 
     return addOrSentence(sentence);
+}
+
+void KnowledgeBase::markWumpusDead() {
+    wumpusAlive = false;
+}
+
+InferenceResult KnowledgeBase::inferUniqueWumpus() {
+    bool foundWumpus = false;
+    Position wumpusPosition{};
+
+    for (const Proposition& proposition : propositions) {
+        if (proposition.type == PropositionType::Wumpus &&
+            !proposition.negated) {
+
+            if (foundWumpus &&
+                (proposition.position.x != wumpusPosition.x ||
+                 proposition.position.y != wumpusPosition.y)) {
+                return InferenceResult::Contradiction;
+                 }
+
+            foundWumpus = true;
+            wumpusPosition = proposition.position;
+            }
+    }
+
+    if (!foundWumpus) {
+        return InferenceResult::NotApplicable;
+    }
+
+    bool changed = false;
+
+    for (int x = 1; x <= n; x++) {
+        for (int y = 1; y <= n; y++) {
+
+            if (x == wumpusPosition.x &&
+                y == wumpusPosition.y) {
+                continue;
+                }
+
+            Proposition noWumpus{
+                PropositionType::Wumpus,
+                {x, y},
+                true
+            };
+
+            InferenceResult result = addProposition(noWumpus);
+
+            if (result == InferenceResult::Contradiction) {
+                return InferenceResult::Contradiction;
+            }
+
+            if (result == InferenceResult::Changed) {
+                changed = true;
+            }
+        }
+    }
+
+    if (changed) {
+        return InferenceResult::Changed;
+    }
+
+    return InferenceResult::NoChange;
 }
