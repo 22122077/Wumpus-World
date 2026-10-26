@@ -64,6 +64,8 @@ class KnowledgeBase {
     InferenceResult markSafe(Position position);
     InferenceResult runInference();
     void markWumpusDead();
+    bool isKnownSafe(Position position) const;
+    bool isVisited(Position position) const;
 };
 
 #endif //KNOWLEDGEBASE_H

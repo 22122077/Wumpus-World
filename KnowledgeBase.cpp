@@ -646,3 +646,23 @@ InferenceResult KnowledgeBase::inferUniqueWumpus() {
 
     return InferenceResult::NoChange;
 }
+
+bool KnowledgeBase::isKnownSafe(Position position) const {
+    Proposition safe{
+        PropositionType::Safe,
+        position,
+        false
+    };
+
+    return containsProposition(safe);
+}
+
+bool KnowledgeBase::isVisited(Position position) const {
+    Proposition visited{
+        PropositionType::Visited,
+        position,
+        false
+    };
+
+    return containsProposition(visited);
+}

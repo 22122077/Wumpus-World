@@ -139,3 +139,10 @@ bool Agent::knows(Proposition proposition) const {
     return knowledgeBase.containsProposition(proposition);
 }
 
+bool Agent::knowsSafe(Position position) const {
+    return knowledgeBase.isKnownSafe(position);
+}
+
+bool Agent::hasVisited(Position position) const {
+    return knowledgeBase.isVisited(position);
+}

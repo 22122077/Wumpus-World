@@ -36,6 +36,8 @@ class Agent {
     void updateScore(int amount);
     InferenceResult processPercept(Percept percept);
     bool knows(Proposition proposition) const;
+    bool knowsSafe(Position position) const;
+    bool hasVisited(Position position) const;
 };
 
 #endif //AGENT_H
