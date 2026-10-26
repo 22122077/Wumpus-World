@@ -27,6 +27,8 @@ class Agent {
     void turnRight();
     bool moveForward(World& world);
     void kill();
+    bool grab(World& world);
+    bool shoot(World& world);
 };
 
 #endif //AGENT_H

@@ -75,3 +75,23 @@ bool Agent::moveForward(World& world) {
 void Agent::kill() {
     alive = false;
 }
+
+bool Agent::grab(World &world) {
+    bool grabbed = world.grabGold(position);
+    if (grabbed) {
+        hasGold = true;
+    }
+    return grabbed;
+}
+
+bool Agent::shoot(World &world) {
+    if (!hasArrow) {
+        return false;
+    }
+
+    hasArrow = false;
+
+    return world.shoot(position, direction);
+}
+
+
