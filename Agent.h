@@ -25,6 +25,8 @@ class Agent {
     bool hasGoldCollected() const;
     void turnLeft();
     void turnRight();
+    bool moveForward(World& world);
+    void kill();
 };
 
 #endif //AGENT_H

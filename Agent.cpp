@@ -67,3 +67,11 @@ void Agent::turnRight() {
             break;
     }
 }
+
+bool Agent::moveForward(World& world) {
+    return world.moveForward(position, direction);
+}
+
+void Agent::kill() {
+    alive = false;
+}
