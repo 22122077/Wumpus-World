@@ -7,4 +7,5 @@ add_executable(Wumpus_World
         main.cpp
         World.cpp
         Agent.cpp
+        Game.cpp
 )

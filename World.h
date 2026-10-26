@@ -21,6 +21,21 @@ enum class Direction {
     West
 };
 
+enum class Action {
+    Forward,
+    TurnLeft,
+    TurnRight,
+    Grab,
+    Shoot,
+    Climb
+};
+
+struct ActionResult {
+    bool bump = false;
+    bool scream = false;
+    bool gameOver = false;
+};
+
 struct Cell {
     bool hasPit = false;
     bool hasWumpus = false;

@@ -94,4 +94,13 @@ bool Agent::shoot(World &world) {
     return world.shoot(position, direction);
 }
 
+bool Agent::climb(World &world) const {
+    return world.canClimb(position);
+}
+
+void Agent::updateScore(int amount) {
+    score += amount;
+}
+
+
 

@@ -29,6 +29,8 @@ class Agent {
     void kill();
     bool grab(World& world);
     bool shoot(World& world);
+    bool climb(World& world) const;
+    void updateScore(int amount);
 };
 
 #endif //AGENT_H
