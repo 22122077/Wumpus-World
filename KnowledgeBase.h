@@ -66,6 +66,9 @@ class KnowledgeBase {
     void markWumpusDead();
     bool isKnownSafe(Position position) const;
     bool isVisited(Position position) const;
+    std::vector<Position> getSafeUnvisitedPositions() const;
+    bool getKnownWumpusPosition(Position& position) const;
+    bool isWumpusAlive() const;
 };
 
 #endif //KNOWLEDGEBASE_H

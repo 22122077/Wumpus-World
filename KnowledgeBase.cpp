@@ -214,13 +214,63 @@ InferenceResult KnowledgeBase::markVisited(Position position) {
 }
 
 InferenceResult KnowledgeBase::markSafe(Position position) {
+    bool changed = false;
+
     Proposition safe{
         PropositionType::Safe,
         position,
         false
     };
 
-    return addProposition(safe);
+    InferenceResult result = addProposition(safe);
+
+    if (result == InferenceResult::Contradiction) {
+        return InferenceResult::Contradiction;
+    }
+
+    if (result == InferenceResult::Changed) {
+        changed = true;
+    }
+
+    Proposition noPit{
+        PropositionType::Pit,
+        position,
+        true
+    };
+
+    result = addProposition(noPit);
+
+    if (result == InferenceResult::Contradiction) {
+        return InferenceResult::Contradiction;
+    }
+
+    if (result == InferenceResult::Changed) {
+        changed = true;
+    }
+
+    if (wumpusAlive) {
+        Proposition noWumpus{
+            PropositionType::Wumpus,
+            position,
+            true
+        };
+
+        result = addProposition(noWumpus);
+
+        if (result == InferenceResult::Contradiction) {
+            return InferenceResult::Contradiction;
+        }
+
+        if (result == InferenceResult::Changed) {
+            changed = true;
+        }
+    }
+
+    if (changed) {
+        return InferenceResult::Changed;
+    }
+
+    return InferenceResult::NoChange;
 }
 
 InferenceResult KnowledgeBase::inferNoPits(Position position) {
@@ -665,4 +715,38 @@ bool KnowledgeBase::isVisited(Position position) const {
     };
 
     return containsProposition(visited);
+}
+
+std::vector<Position> KnowledgeBase::getSafeUnvisitedPositions() const {
+    std::vector<Position> positions;
+
+    for (int x = 1; x <= n; x++) {
+        for (int y = 1; y <= n; y++) {
+            Position position{x, y};
+
+            if (isKnownSafe(position) &&
+                !isVisited(position)) {
+                positions.push_back(position);
+                }
+        }
+    }
+
+    return positions;
+}
+
+bool KnowledgeBase::getKnownWumpusPosition(Position& position) const {
+    for (const Proposition& proposition : propositions) {
+        if (proposition.type == PropositionType::Wumpus &&
+            !proposition.negated) {
+
+            position = proposition.position;
+            return true;
+            }
+    }
+
+    return false;
+}
+
+bool KnowledgeBase::isWumpusAlive() const {
+    return wumpusAlive;
 }

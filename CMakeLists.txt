@@ -9,4 +9,5 @@ add_executable(Wumpus_World
         Agent.cpp
         Game.cpp
         KnowledgeBase.cpp
+        Search.cpp
 )

@@ -8,6 +8,8 @@
 #include "World.h"
 #include "KnowledgeBase.h"
 
+class Search;
+
 class Agent {
     private:
     Position position{1, 1};
@@ -17,6 +19,7 @@ class Agent {
     bool alive = true;
     int score = 0;
     KnowledgeBase knowledgeBase;
+    Action turnToward(Direction targetDirection) const;
 
     public:
     explicit Agent(int worldSize);
@@ -38,6 +41,13 @@ class Agent {
     bool knows(Proposition proposition) const;
     bool knowsSafe(Position position) const;
     bool hasVisited(Position position) const;
+    std::vector<Position> getSafeUnvisitedPositions() const;
+    Action chooseAction(
+        Percept percept,
+        const Search& search
+    ) const;
+    bool getKnownWumpusPosition(Position& position) const;
+    bool isWumpusAlive() const;
 };
 
 #endif //AGENT_H

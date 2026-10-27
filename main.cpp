@@ -1,8 +1,30 @@
 #include <iostream>
 #include "World.h"
 #include "Agent.h"
+#include "Search.h"
+#include "Game.h"
+#include "Search.h"
 
 using namespace std;
+
+const char* actionToString(Action action) {
+    switch (action) {
+        case Action::Forward:
+            return "Forward";
+        case Action::TurnLeft:
+            return "TurnLeft";
+        case Action::TurnRight:
+            return "TurnRight";
+        case Action::Grab:
+            return "Grab";
+        case Action::Shoot:
+            return "Shoot";
+        case Action::Climb:
+            return "Climb";
+    }
+
+    return "Unknown";
+}
 
 int main() {
     int n;
@@ -20,34 +42,77 @@ int main() {
     world.printWorld();
 
     Agent agent(n);
+    Game game;
+    Search search;
 
-    Percept initialPercept = world.getPercept(
+    Percept percept = world.getPercept(
         agent.getPosition(),
         false,
         false
     );
 
-    InferenceResult result = agent.processPercept(initialPercept);
+    InferenceResult inferenceResult =
+        agent.processPercept(percept);
 
-    Proposition safeEast{
-        PropositionType::Safe,
-        {2, 1},
-        false
-    };
+    bool gameOver = false;
 
-    cout << "Agent knows [2,1] is safe: "
-         << agent.knows(safeEast)
-         << endl;
+    while (!gameOver && agent.isAlive()) {
+        Action action = agent.chooseAction(
+            percept,
+            search
+        );
 
-    Proposition safeNorth{
-        PropositionType::Safe,
-        {1, 2},
-        false
-    };
+        std::cout << "Action: "
+          << actionToString(action)
+          << std::endl;
 
-    cout << "Agent knows [1,2] is safe: "
-         << agent.knows(safeNorth)
-         << endl;
+        ActionResult actionResult =
+            game.executeAction(
+                action,
+                agent,
+                world
+            );
+
+        if (actionResult.scream) {
+            std::cout << "Scream: Wumpus killed" << std::endl;
+        }
+
+        Position currentPosition = agent.getPosition();
+
+        std::cout << "Position: ["
+                  << currentPosition.x
+                  << ","
+                  << currentPosition.y
+                  << "]  Score: "
+                  << agent.getScore()
+                  << std::endl;
+
+        gameOver = actionResult.gameOver;
+
+        if (gameOver) {
+            break;
+        }
+
+        percept = world.getPercept(
+            agent.getPosition(),
+            actionResult.bump,
+            actionResult.scream
+        );
+
+        inferenceResult =
+            agent.processPercept(percept);
+
+        if (inferenceResult ==
+            InferenceResult::Contradiction) {
+            std::cout << "Knowledge base contradiction detected."
+                      << std::endl;
+            break;
+            }
+    }
+
+    std::cout << "Final score: "
+              << agent.getScore()
+              << std::endl;
 
     return 0;
 }
