@@ -5,8 +5,6 @@
 #include "Game.h"
 #include "Search.h"
 
-using namespace std;
-
 const char* actionToString(Action action) {
     switch (action) {
         case Action::Forward:
@@ -29,8 +27,8 @@ const char* actionToString(Action action) {
 int main() {
     int n;
     do {
-        cout << "Enter world size: ";
-        cin >> n;
+        std::cout << "Enter world size: ";
+        std::cin >> n;
     }
     while (n < 2);
 
@@ -39,6 +37,7 @@ int main() {
     world.placeWumpus();
     world.placeGold();
     world.placePits();
+    std::cout << "\nWorld layout (observer view):" << std::endl;
     world.printWorld();
 
     Agent agent(n);

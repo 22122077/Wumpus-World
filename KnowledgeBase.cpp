@@ -7,7 +7,6 @@
 
 KnowledgeBase::KnowledgeBase(int size)
     : n(size) {
-
 }
 
 InferenceResult KnowledgeBase::runInference() {
@@ -89,6 +88,20 @@ InferenceResult KnowledgeBase::runInference() {
             anyChange = true;
         }
 
+        InferenceResult remainingWumpusResult =
+                inferRemainingWumpus();
+
+        if (remainingWumpusResult ==
+            InferenceResult::Contradiction) {
+            return InferenceResult::Contradiction;
+        }
+
+        if (remainingWumpusResult ==
+            InferenceResult::Changed) {
+            passChanged = true;
+            anyChange = true;
+        }
+
         InferenceResult simplifyResult = simplifyOrSentences();
 
         if (simplifyResult == InferenceResult::Contradiction) {
@@ -99,7 +112,6 @@ InferenceResult KnowledgeBase::runInference() {
             passChanged = true;
             anyChange = true;
         }
-
     } while (passChanged);
 
     if (anyChange) {
@@ -158,13 +170,13 @@ InferenceResult KnowledgeBase::addProposition(Proposition proposition) {
 }
 
 bool KnowledgeBase::containsProposition(Proposition proposition) const {
-    for (const Proposition& existing : propositions) {
+    for (const Proposition &existing: propositions) {
         if (existing.type == proposition.type &&
             existing.position.x == proposition.position.x &&
             existing.position.y == proposition.position.y &&
             existing.negated == proposition.negated) {
             return true;
-            }
+        }
     }
 
     return false;
@@ -198,7 +210,7 @@ InferenceResult KnowledgeBase::addPerceptFacts(Percept percept, Position positio
     if (breezeResult == InferenceResult::Changed ||
         stenchResult == InferenceResult::Changed) {
         return InferenceResult::Changed;
-        }
+    }
 
     return InferenceResult::NoChange;
 }
@@ -288,7 +300,7 @@ InferenceResult KnowledgeBase::inferNoPits(Position position) {
 
     std::vector<Position> neighbors = getNeighbors(position);
 
-    for (Position neighbor : neighbors) {
+    for (Position neighbor: neighbors) {
         Proposition noPit{
             PropositionType::Pit,
             neighbor,
@@ -328,7 +340,7 @@ InferenceResult KnowledgeBase::inferNoWumpus(Position position) {
 
     std::vector<Position> neighbors = getNeighbors(position);
 
-    for (Position neighbor : neighbors) {
+    for (Position neighbor: neighbors) {
         Proposition noWumpus{
             PropositionType::Wumpus,
             neighbor,
@@ -383,39 +395,6 @@ InferenceResult KnowledgeBase::inferSafe(Position position) {
     return addProposition(safe);
 }
 
-InferenceResult KnowledgeBase::inferSafeNeighbors(Position position) {
-    std::vector<Position> neighbors = getNeighbors(position);
-
-    bool applicable = false;
-    bool changed = false;
-
-    for (Position neighbor : neighbors) {
-        InferenceResult result = inferSafe(neighbor);
-
-        if (result == InferenceResult::Contradiction) {
-            return InferenceResult::Contradiction;
-        }
-
-        if (result != InferenceResult::NotApplicable) {
-            applicable = true;
-        }
-
-        if (result == InferenceResult::Changed) {
-            changed = true;
-        }
-    }
-
-    if (changed) {
-        return InferenceResult::Changed;
-    }
-
-    if (applicable) {
-        return InferenceResult::NoChange;
-    }
-
-    return InferenceResult::NotApplicable;
-}
-
 InferenceResult KnowledgeBase::inferFromBreeze(Position position) {
     Proposition breeze{
         PropositionType::Breeze,
@@ -430,7 +409,7 @@ InferenceResult KnowledgeBase::inferFromBreeze(Position position) {
     std::vector<Position> neighbors = getNeighbors(position);
     std::vector<Proposition> possiblePits;
 
-    for (Position neighbor : neighbors) {
+    for (Position neighbor: neighbors) {
         Proposition noPit{
             PropositionType::Pit,
             neighbor,
@@ -446,7 +425,7 @@ InferenceResult KnowledgeBase::inferFromBreeze(Position position) {
         if (containsProposition(noPit) ||
             containsProposition(safe)) {
             continue;
-            }
+        }
 
         Proposition possiblePit{
             PropositionType::Pit,
@@ -472,27 +451,25 @@ InferenceResult KnowledgeBase::inferFromBreeze(Position position) {
     return addOrSentence(sentence);
 }
 
-bool KnowledgeBase::containsOrSentence(const OrSentence& sentence) const {
-    for (const OrSentence& existing : orSentences) {
-
+bool KnowledgeBase::containsOrSentence(const OrSentence &sentence) const {
+    for (const OrSentence &existing: orSentences) {
         if (existing.propositions.size() != sentence.propositions.size()) {
             continue;
         }
 
         bool allMatch = true;
 
-        for (const Proposition& proposition : sentence.propositions) {
+        for (const Proposition &proposition: sentence.propositions) {
             bool foundMatch = false;
 
-            for (const Proposition& existingProposition : existing.propositions) {
+            for (const Proposition &existingProposition: existing.propositions) {
                 if (existingProposition.type == proposition.type &&
                     existingProposition.position.x == proposition.position.x &&
                     existingProposition.position.y == proposition.position.y &&
                     existingProposition.negated == proposition.negated) {
-
                     foundMatch = true;
                     break;
-                    }
+                }
             }
 
             if (!foundMatch) {
@@ -509,7 +486,7 @@ bool KnowledgeBase::containsOrSentence(const OrSentence& sentence) const {
     return false;
 }
 
-InferenceResult KnowledgeBase::addOrSentence(const OrSentence& sentence) {
+InferenceResult KnowledgeBase::addOrSentence(const OrSentence &sentence) {
     if (containsOrSentence(sentence)) {
         return InferenceResult::NoChange;
     }
@@ -518,7 +495,7 @@ InferenceResult KnowledgeBase::addOrSentence(const OrSentence& sentence) {
     return InferenceResult::Changed;
 }
 
-InferenceResult KnowledgeBase::simplifyOrSentence(OrSentence& sentence) {
+InferenceResult KnowledgeBase::simplifyOrSentence(OrSentence &sentence) {
     bool changed = false;
 
     for (size_t i = 0; i < sentence.propositions.size();) {
@@ -531,8 +508,7 @@ InferenceResult KnowledgeBase::simplifyOrSentence(OrSentence& sentence) {
             );
 
             changed = true;
-        }
-        else {
+        } else {
             i++;
         }
     }
@@ -567,7 +543,7 @@ InferenceResult KnowledgeBase::simplifyOrSentence(OrSentence& sentence) {
 InferenceResult KnowledgeBase::simplifyOrSentences() {
     bool changed = false;
 
-    for (OrSentence& sentence : orSentences) {
+    for (OrSentence &sentence: orSentences) {
         InferenceResult result = simplifyOrSentence(sentence);
 
         if (result == InferenceResult::Contradiction) {
@@ -600,7 +576,7 @@ InferenceResult KnowledgeBase::inferFromStench(Position position) {
     std::vector<Position> neighbors = getNeighbors(position);
     std::vector<Proposition> possibleWumpusLocations;
 
-    for (Position neighbor : neighbors) {
+    for (Position neighbor: neighbors) {
         Proposition noWumpus{
             PropositionType::Wumpus,
             neighbor,
@@ -643,19 +619,18 @@ InferenceResult KnowledgeBase::inferUniqueWumpus() {
     bool foundWumpus = false;
     Position wumpusPosition{};
 
-    for (const Proposition& proposition : propositions) {
+    for (const Proposition &proposition: propositions) {
         if (proposition.type == PropositionType::Wumpus &&
             !proposition.negated) {
-
             if (foundWumpus &&
                 (proposition.position.x != wumpusPosition.x ||
                  proposition.position.y != wumpusPosition.y)) {
                 return InferenceResult::Contradiction;
-                 }
+            }
 
             foundWumpus = true;
             wumpusPosition = proposition.position;
-            }
+        }
     }
 
     if (!foundWumpus) {
@@ -666,11 +641,10 @@ InferenceResult KnowledgeBase::inferUniqueWumpus() {
 
     for (int x = 1; x <= n; x++) {
         for (int y = 1; y <= n; y++) {
-
             if (x == wumpusPosition.x &&
                 y == wumpusPosition.y) {
                 continue;
-                }
+            }
 
             Proposition noWumpus{
                 PropositionType::Wumpus,
@@ -727,21 +701,20 @@ std::vector<Position> KnowledgeBase::getSafeUnvisitedPositions() const {
             if (isKnownSafe(position) &&
                 !isVisited(position)) {
                 positions.push_back(position);
-                }
+            }
         }
     }
 
     return positions;
 }
 
-bool KnowledgeBase::getKnownWumpusPosition(Position& position) const {
-    for (const Proposition& proposition : propositions) {
+bool KnowledgeBase::getKnownWumpusPosition(Position &position) const {
+    for (const Proposition &proposition: propositions) {
         if (proposition.type == PropositionType::Wumpus &&
             !proposition.negated) {
-
             position = proposition.position;
             return true;
-            }
+        }
     }
 
     return false;
@@ -749,4 +722,42 @@ bool KnowledgeBase::getKnownWumpusPosition(Position& position) const {
 
 bool KnowledgeBase::isWumpusAlive() const {
     return wumpusAlive;
+}
+
+InferenceResult KnowledgeBase::inferRemainingWumpus() {
+    int possibleCount = 0;
+    Position possiblePosition{};
+
+    for (int x = 1; x <= n; x++) {
+        for (int y = 1; y <= n; y++) {
+            Position position{x, y};
+
+            Proposition noWumpus{
+                PropositionType::Wumpus,
+                position,
+                true
+            };
+
+            if (!containsProposition(noWumpus)) {
+                possibleCount++;
+                possiblePosition = position;
+            }
+        }
+    }
+
+    if (possibleCount == 0) {
+        return InferenceResult::Contradiction;
+    }
+
+    if (possibleCount == 1) {
+        Proposition wumpus{
+            PropositionType::Wumpus,
+            possiblePosition,
+            false
+        };
+
+        return addProposition(wumpus);
+    }
+
+    return InferenceResult::NotApplicable;
 }

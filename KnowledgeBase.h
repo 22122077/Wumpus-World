@@ -44,7 +44,6 @@ class KnowledgeBase {
     InferenceResult inferNoPits(Position position);
     InferenceResult inferNoWumpus(Position position);
     InferenceResult inferSafe(Position position);
-    InferenceResult inferSafeNeighbors(Position position);
     InferenceResult inferFromBreeze(Position position);
     InferenceResult inferFromStench(Position position);
     bool containsOrSentence(const OrSentence& sentence) const;
@@ -53,6 +52,7 @@ class KnowledgeBase {
     InferenceResult simplifyOrSentences();
     bool wumpusAlive = true;
     InferenceResult inferUniqueWumpus();
+    InferenceResult inferRemainingWumpus();
 
 
     public:

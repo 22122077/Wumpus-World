@@ -7,7 +7,6 @@
 
 #include <vector>
 #include <random>
-using namespace std;
 
 struct Position {
     int x;
@@ -54,12 +53,12 @@ class World {
 
     private:
         int n;
-        vector<vector<Cell>> grid; //grid[x][y]
+        std::vector<std::vector<Cell>> grid; //grid[x][y]
         bool isProtectedStartSquare(Position position) const;
         Position randPosition();
-        mt19937 gen;
+        std::mt19937 gen;
         bool isInsideWorld(Position position) const;
-        vector<Position> getNeighbors(Position position) const;
+        std::vector<Position> getNeighbors(Position position) const;
         bool hasBreeze(Position position) const;
         bool hasStench(Position position) const;
         Position getForwardPosition(Position position, Direction direction) const;

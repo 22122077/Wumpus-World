@@ -7,8 +7,8 @@
 
 World::World(int size)
     : n(size),
-        grid(size, vector<Cell>(size)),
-        gen(random_device{}()) {
+        grid(size, std::vector<Cell>(size)),
+        gen(std::random_device{}()) {
 
 }
 
@@ -19,26 +19,26 @@ void World::printWorld() const {
             const Cell& cell = grid[x][y];
 
             if (cell.hasGold && cell.hasWumpus) {
-                cout << "GW ";
+                std::cout << "GW ";
             }
             else if (cell.hasWumpus && cell.hasPit) {
-                cout << "WP ";
+                std::cout << "WP ";
             }
             else if (cell.hasGold) {
-                cout << "G  ";
+                std::cout << "G  ";
             }
             else if (cell.hasWumpus) {
-                cout << "W  ";
+                std::cout << "W  ";
             }
             else if (cell.hasPit) {
-                cout << "P  ";
+                std::cout << "P  ";
             }
             else {
-                cout << ".  ";
+                std::cout << ".  ";
             }
         }
 
-        cout << endl;
+        std::cout << std::endl;
     }
 }
 
@@ -74,7 +74,7 @@ void World::placeWumpus() {
 }
 
 void World::placePits() {
-    bernoulli_distribution pitChance(0.2);
+    std::bernoulli_distribution pitChance(0.2);
 
     for (int x = 0; x < n; x++) {
         for (int y = 0; y < n; y++) {
@@ -92,7 +92,7 @@ void World::placePits() {
 }
 
 Position World::randPosition() {
-    uniform_int_distribution<int> dist(1, n);
+    std::uniform_int_distribution<int> dist(1, n);
 
     Position pos;
 
@@ -107,8 +107,8 @@ bool World::isInsideWorld(Position position) const {
             position.y >= 1 && position.y <= n;
 }
 
-vector<Position> World::getNeighbors(Position position) const {
-    vector<Position> neighbors;
+std::vector<Position> World::getNeighbors(Position position) const {
+    std::vector<Position> neighbors;
 
     Position left{position.x - 1, position.y};
     Position right{position.x + 1, position.y};
@@ -132,7 +132,7 @@ vector<Position> World::getNeighbors(Position position) const {
 }
 
 bool World::hasBreeze(Position position) const {
-    vector<Position> neighbors = getNeighbors(position);
+    std::vector<Position> neighbors = getNeighbors(position);
 
     for (Position neighbor : neighbors) {
         if (grid[neighbor.x - 1][neighbor.y -1].hasPit) {
@@ -144,7 +144,7 @@ bool World::hasBreeze(Position position) const {
 }
 
 bool World::hasStench(Position position) const {
-    vector<Position> neighbors = getNeighbors(position);
+    std::vector<Position> neighbors = getNeighbors(position);
 
     for (Position neighbor : neighbors) {
         if (grid[neighbor.x - 1][neighbor.y -1].hasWumpus) {
