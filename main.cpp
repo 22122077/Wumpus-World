@@ -40,7 +40,7 @@ int main() {
     std::cout << "\nWorld layout (observer view):" << std::endl;
     world.printWorld();
 
-    Agent agent(n);
+    Agent agent;
     Game game;
     Search search;
 
@@ -71,6 +71,10 @@ int main() {
                 agent,
                 world
             );
+
+        if (actionResult.bump) {
+            std::cout << "Bump: wall detected" << std::endl;
+        }
 
         if (actionResult.scream) {
             std::cout << "Scream: Wumpus killed" << std::endl;

@@ -14,7 +14,8 @@ enum class PropositionType {
     Pit,
     Wumpus,
     Safe,
-    Visited
+    Visited,
+    CellValid
 };
 
 struct Proposition {
@@ -36,10 +37,8 @@ enum class InferenceResult {
 
 class KnowledgeBase {
     private:
-    int n;
     std::vector<Proposition> propositions;
     std::vector<OrSentence> orSentences;
-    bool isInsideWorld(Position position) const;
     std::vector<Position> getNeighbors(Position position) const;
     InferenceResult inferNoPits(Position position);
     InferenceResult inferNoWumpus(Position position);
@@ -52,11 +51,15 @@ class KnowledgeBase {
     InferenceResult simplifyOrSentences();
     bool wumpusAlive = true;
     InferenceResult inferUniqueWumpus();
-    InferenceResult inferRemainingWumpus();
+    std::vector<Position> getRelevantPositions() const;
+    bool containsPosition(
+        const std::vector<Position>& positions,
+        Position position
+    ) const;
 
 
     public:
-    explicit KnowledgeBase(int size);
+    KnowledgeBase();
     InferenceResult addProposition(Proposition proposition);
     bool containsProposition(Proposition proposition) const;
     InferenceResult addPerceptFacts(Percept percept, Position position);
@@ -69,6 +72,10 @@ class KnowledgeBase {
     std::vector<Position> getSafeUnvisitedPositions() const;
     bool getKnownWumpusPosition(Position& position) const;
     bool isWumpusAlive() const;
+    InferenceResult markCellValid(Position position);
+    InferenceResult markCellInvalid(Position position);
+    bool isKnownValid(Position position) const;
+    bool isKnownInvalid(Position position) const;
 };
 
 #endif //KNOWLEDGEBASE_H

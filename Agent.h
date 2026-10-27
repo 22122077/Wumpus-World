@@ -20,9 +20,13 @@ class Agent {
     int score = 0;
     KnowledgeBase knowledgeBase;
     Action turnToward(Direction targetDirection) const;
+    Position getForwardPosition(
+        Position position,
+        Direction direction
+    ) const;
 
     public:
-    explicit Agent(int worldSize);
+    Agent();
     Position getPosition() const;
     Direction getDirection() const;
     bool isAlive() const;
@@ -40,6 +44,7 @@ class Agent {
     InferenceResult processPercept(Percept percept);
     bool knows(Proposition proposition) const;
     bool knowsSafe(Position position) const;
+    bool knowsValid(Position position) const;
     bool hasVisited(Position position) const;
     std::vector<Position> getSafeUnvisitedPositions() const;
     Action chooseAction(

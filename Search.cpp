@@ -79,6 +79,7 @@ std::vector<Action> Search::findPathTo(
         };
 
         if (agent.knowsSafe(forwardPosition) &&
+            agent.knowsValid(forwardPosition) &&
             !containsState(visitedStates, forwardState)) {
             SearchNode forwardNode{
                 forwardState,
@@ -259,7 +260,10 @@ std::vector<Action> Search::findPathToAny(
             current.state.direction
         };
 
+        bool isGoal = containsPosition(goals, forwardPosition);
+
         if (agent.knowsSafe(forwardPosition) &&
+            (agent.knowsValid(forwardPosition) || isGoal) &&
             !containsState(visitedStates, forwardState)) {
 
             SearchNode forwardNode{

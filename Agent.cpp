@@ -29,14 +29,44 @@ bool Agent::hasGoldCollected() const {
     return hasGold;
 }
 
-Agent::Agent(int worldSize)
-    : knowledgeBase(worldSize) {
+Agent::Agent() {
+    knowledgeBase.markCellValid(position);
     knowledgeBase.markVisited(position);
     knowledgeBase.markSafe(position);
 }
 
 InferenceResult Agent::processPercept(Percept percept) {
     bool changed = false;
+
+    if (percept.bump) {
+        Position attemptedPosition =
+            getForwardPosition(position, direction);
+
+        InferenceResult result =
+            knowledgeBase.markCellInvalid(
+                attemptedPosition
+            );
+
+        if (result == InferenceResult::Contradiction) {
+            return InferenceResult::Contradiction;
+        }
+
+        if (result == InferenceResult::Changed) {
+            changed = true;
+        }
+    }
+    else {
+        InferenceResult result =
+            knowledgeBase.markCellValid(position);
+
+        if (result == InferenceResult::Contradiction) {
+            return InferenceResult::Contradiction;
+        }
+
+        if (result == InferenceResult::Changed) {
+            changed = true;
+        }
+    }
 
     if (percept.scream) {
         knowledgeBase.markWumpusDead();
@@ -280,4 +310,33 @@ Action Agent::turnToward(Direction targetDirection) const {
     }
 
     return Action::TurnRight;
+}
+
+Position Agent::getForwardPosition(
+    Position position,
+    Direction direction
+) const {
+    switch (direction) {
+        case Direction::North:
+            position.y += 1;
+            break;
+
+        case Direction::East:
+            position.x += 1;
+            break;
+
+        case Direction::South:
+            position.y -= 1;
+            break;
+
+        case Direction::West:
+            position.x -= 1;
+            break;
+    }
+
+    return position;
+}
+
+bool Agent::knowsValid(Position position) const {
+    return knowledgeBase.isKnownValid(position);
 }
