@@ -3,8 +3,12 @@
 #include "Agent.h"
 #include "Search.h"
 #include "Game.h"
-#include "Search.h"
 
+
+// ==================== OUTPUT HELPERS ====================
+
+
+// Converts each action into readable output for observing Agent behavior.
 const char* actionToString(Action action) {
     switch (action) {
         case Action::Forward:
@@ -24,19 +28,31 @@ const char* actionToString(Action action) {
     return "Unknown";
 }
 
+
+// ==================== MAIN GAME LOOP ====================
+
+
 int main() {
     int n;
+
+    // World supports variable n x n sizes rather than assuming a fixed map.
     do {
         std::cout << "Enter world size: ";
         std::cin >> n;
     }
+    // World must be at least 2 x 2 so valid non-start positions exist.
     while (n < 2);
 
+    // World generates the true hidden environment.
+    // Only World knows n and the actual locations of hazards/Gold.
     World world(n);
 
     world.placeWumpus();
     world.placeGold();
     world.placePits();
+
+    // Full map is printed only for observer/testing purposes.
+    // Agent does NOT receive this layout.
     std::cout << "\nWorld layout (observer view):" << std::endl;
     world.printWorld();
 
@@ -44,6 +60,8 @@ int main() {
     Game game;
     Search search;
 
+    // Agent begins at [1,1] and receives only the percept available
+    // at its current position rather than hidden World info.
     Percept percept = world.getPercept(
         agent.getPosition(),
         false,
@@ -51,10 +69,19 @@ int main() {
     );
 
     InferenceResult inferenceResult =
-        agent.processPercept(percept);
+            agent.processPercept(percept);
+
+    if (inferenceResult ==
+        InferenceResult::Contradiction) {
+        std::cout << "Knowledge base contradiction detected."
+                << std::endl;
+        return 0;
+    }
 
     bool gameOver = false;
 
+    // Each cycle follows the Agent loop:
+    // perceive/reason -> choose action -> execute -> receive new percept.
     while (!gameOver && agent.isAlive()) {
         Action action = agent.chooseAction(
             percept,
@@ -62,16 +89,18 @@ int main() {
         );
 
         std::cout << "Action: "
-          << actionToString(action)
-          << std::endl;
+                << actionToString(action)
+                << std::endl;
 
         ActionResult actionResult =
-            game.executeAction(
-                action,
-                agent,
-                world
-            );
+                game.executeAction(
+                    action,
+                    agent,
+                    world
+                );
 
+        // Bump and Scream are action-result percepts that Agent
+        // receives during the next reasoning cycle.
         if (actionResult.bump) {
             std::cout << "Bump: wall detected" << std::endl;
         }
@@ -83,12 +112,12 @@ int main() {
         Position currentPosition = agent.getPosition();
 
         std::cout << "Position: ["
-                  << currentPosition.x
-                  << ","
-                  << currentPosition.y
-                  << "]  Score: "
-                  << agent.getScore()
-                  << std::endl;
+                << currentPosition.x
+                << ","
+                << currentPosition.y
+                << "]  Score: "
+                << agent.getScore()
+                << std::endl;
 
         gameOver = actionResult.gameOver;
 
@@ -96,26 +125,30 @@ int main() {
             break;
         }
 
+        // World generates the next percept from Agent's actual position
+        // plus Bump/Scream produced by the previous action.
         percept = world.getPercept(
             agent.getPosition(),
             actionResult.bump,
             actionResult.scream
         );
 
+        // Agent updates KB and completes inference before choosing
+        // another action.
         inferenceResult =
-            agent.processPercept(percept);
+                agent.processPercept(percept);
 
         if (inferenceResult ==
             InferenceResult::Contradiction) {
             std::cout << "Knowledge base contradiction detected."
-                      << std::endl;
+                    << std::endl;
             break;
-            }
+        }
     }
 
     std::cout << "Final score: "
-              << agent.getScore()
-              << std::endl;
+            << agent.getScore()
+            << std::endl;
 
     return 0;
 }

@@ -5,6 +5,18 @@
 #include "Agent.h"
 #include "Search.h"
 
+
+// ==================== AGENT SETUP / STATE ====================
+
+
+// Agent begins with only knowledge of its initial safe position.
+// World size and hidden cell contents are NOT provided to Agent.
+Agent::Agent() {
+    knowledgeBase.markCellValid(position);
+    knowledgeBase.markVisited(position);
+    knowledgeBase.markSafe(position);
+}
+
 Position Agent::getPosition() const {
     return position;
 }
@@ -29,23 +41,38 @@ bool Agent::hasGoldCollected() const {
     return hasGold;
 }
 
-Agent::Agent() {
-    knowledgeBase.markCellValid(position);
-    knowledgeBase.markVisited(position);
-    knowledgeBase.markSafe(position);
-}
 
+// ==================== PERCEPT PROCESSING ====================
+
+
+// Updates KB after every action using only Agent's current percept.
+// Bump/Scream update world-state knowledge first, then current position
+// facts are stored before running inference to a fixed point.
 InferenceResult Agent::processPercept(Percept percept) {
     bool changed = false;
 
+    // A failed Forward action leaves Agent in its current position.
+    // The coordinate directly ahead can therefore be marked invalid.
     if (percept.bump) {
         Position attemptedPosition =
-            getForwardPosition(position, direction);
+                getForwardPosition(position, direction);
 
         InferenceResult result =
-            knowledgeBase.markCellInvalid(
-                attemptedPosition
-            );
+                knowledgeBase.markCellInvalid(
+                    attemptedPosition
+                );
+
+        if (result == InferenceResult::Contradiction) {
+            return InferenceResult::Contradiction;
+        }
+
+        if (result == InferenceResult::Changed) {
+            changed = true;
+        }
+    } else {
+        // Successful occupancy confirms that current coordinate exists.
+        InferenceResult result =
+                knowledgeBase.markCellValid(position);
 
         if (result == InferenceResult::Contradiction) {
             return InferenceResult::Contradiction;
@@ -55,19 +82,9 @@ InferenceResult Agent::processPercept(Percept percept) {
             changed = true;
         }
     }
-    else {
-        InferenceResult result =
-            knowledgeBase.markCellValid(position);
 
-        if (result == InferenceResult::Contradiction) {
-            return InferenceResult::Contradiction;
-        }
-
-        if (result == InferenceResult::Changed) {
-            changed = true;
-        }
-    }
-
+    // Scream confirms Wumpus is dead without removing previously
+    // inferred info about its physical location.
     if (percept.scream) {
         knowledgeBase.markWumpusDead();
         changed = true;
@@ -83,6 +100,8 @@ InferenceResult Agent::processPercept(Percept percept) {
         changed = true;
     }
 
+    // Since Agent is still alive at its current position, that position
+    // can safely be recorded as containing no active hazard.
     result = knowledgeBase.markSafe(position);
 
     if (result == InferenceResult::Contradiction) {
@@ -93,6 +112,8 @@ InferenceResult Agent::processPercept(Percept percept) {
         changed = true;
     }
 
+    // Breeze and Stench are converted into positive or negative
+    // propositional facts before inference rules are applied.
     result = knowledgeBase.addPerceptFacts(percept, position);
 
     if (result == InferenceResult::Contradiction) {
@@ -119,6 +140,10 @@ InferenceResult Agent::processPercept(Percept percept) {
 
     return InferenceResult::NoChange;
 }
+
+
+// ==================== PHYSICAL ACTIONS ====================
+
 
 void Agent::turnLeft() {
     switch (direction) {
@@ -160,10 +185,13 @@ void Agent::turnRight() {
     }
 }
 
+// World performs actual boundary checking because Agent does NOT know n.
+// False means movement failed and next percept will contain Bump.
 bool Agent::moveForward(World &world) {
     return world.moveForward(position, direction);
 }
 
+// Marks Agent as dead after Game detects a deadly position.
 void Agent::kill() {
     alive = false;
 }
@@ -176,6 +204,7 @@ bool Agent::grab(World &world) {
     return grabbed;
 }
 
+// Agent has only one arrow. It is consumed whether or not Wumpus is hit.
 bool Agent::shoot(World &world) {
     if (!hasArrow) {
         return false;
@@ -194,22 +223,43 @@ void Agent::updateScore(int amount) {
     score += amount;
 }
 
-bool Agent::knows(Proposition proposition) const {
-    return knowledgeBase.containsProposition(proposition);
-}
 
+// ==================== KNOWLEDGE QUERIES ====================
+
+
+// Search uses these public queries instead of accessing KB directly.
 bool Agent::knowsSafe(Position position) const {
     return knowledgeBase.isKnownSafe(position);
 }
 
-bool Agent::hasVisited(Position position) const {
-    return knowledgeBase.isVisited(position);
+bool Agent::knowsValid(Position position) const {
+    return knowledgeBase.isKnownValid(position);
 }
 
+// Internal query used to choose unexplored targets that KB has proven safe.
 std::vector<Position> Agent::getSafeUnvisitedPositions() const {
     return knowledgeBase.getSafeUnvisitedPositions();
 }
 
+bool Agent::getKnownWumpusPosition(Position &position) const {
+    return knowledgeBase.getKnownWumpusPosition(position);
+}
+
+bool Agent::isWumpusAlive() const {
+    return knowledgeBase.isWumpusAlive();
+}
+
+
+// ==================== ACTION SELECTION ====================
+
+// Action priority:
+// 1. Grab visible Gold.
+// 2. Return home and Climb once Gold is collected.
+// 3. Shoot a definitely known Wumpus when Agent is aligned with it.
+// 4. BFS toward a safe unvisited position.
+// 5. Return home and Climb when no safe exploration remains.
+//
+// Agent never deliberately enters a position unless KB has proven it Safe.
 Action Agent::chooseAction(
     Percept percept,
     const Search &search
@@ -218,6 +268,8 @@ Action Agent::chooseAction(
         return Action::Grab;
     }
 
+    // Once Gold is collected, exploration stops and Agent uses BFS
+    // through known safe cells to return to [1,1].
     if (hasGold) {
         Position home{1, 1};
 
@@ -234,32 +286,37 @@ Action Agent::chooseAction(
         }
     }
 
+    // Agent only shoots after KB has inferred one definite Wumpus position.
+    // Shooting is attempted when Wumpus shares Agent's row or column.
     if (hasArrow && isWumpusAlive()) {
         Position wumpusPosition;
 
         if (getKnownWumpusPosition(wumpusPosition)) {
             if (wumpusPosition.y == position.y) {
                 if (wumpusPosition.x > position.x) {
-                    return turnToward(Direction::East);
+                    return getShootAction(Direction::East);
                 }
 
                 if (wumpusPosition.x < position.x) {
-                    return turnToward(Direction::West);
+                    return getShootAction(Direction::West);
                 }
             }
 
             if (wumpusPosition.x == position.x) {
                 if (wumpusPosition.y > position.y) {
-                    return turnToward(Direction::North);
+                    return getShootAction(Direction::North);
                 }
 
                 if (wumpusPosition.y < position.y) {
-                    return turnToward(Direction::South);
+                    return getShootAction(Direction::South);
                 }
             }
         }
     }
 
+    // Safe unexplored positions become BFS goals.
+    // Search returns primitive movement/turn actions and Agent executes
+    // only the first action before processing a new percept and replanning.
     std::vector<Position> safeUnvisited =
             getSafeUnvisitedPositions();
 
@@ -274,6 +331,8 @@ Action Agent::chooseAction(
 
     Position home{1, 1};
 
+    // If no provably safe exploration remains, Agent exits rather
+    // than deliberately taking a risk through an unknown cell.
     if (position.x == home.x &&
         position.y == home.y) {
         return Action::Climb;
@@ -286,18 +345,19 @@ Action Agent::chooseAction(
         return pathHome[0];
     }
 
+    // Defensive fallback. Under normal operation a path home should
+    // exist because Agent only travels through proven safe positions.
     return Action::Climb;
 }
 
-bool Agent::getKnownWumpusPosition(Position &position) const {
-    return knowledgeBase.getKnownWumpusPosition(position);
-}
 
-bool Agent::isWumpusAlive() const {
-    return knowledgeBase.isWumpusAlive();
-}
+// ==================== PRIVATE HELPERS ====================
 
-Action Agent::turnToward(Direction targetDirection) const {
+
+// Returns Shoot when Agent already faces Wumpus.
+// Otherwise returns one turn toward required shooting direction.
+// If direction is opposite, repeated replanning completes second turn.
+Action Agent::getShootAction(Direction targetDirection) const {
     if (direction == targetDirection) {
         return Action::Shoot;
     }
@@ -312,6 +372,9 @@ Action Agent::turnToward(Direction targetDirection) const {
     return Action::TurnRight;
 }
 
+// Calculates coordinate directly ahead without checking world boundaries.
+// This is needed after Bump because Agent must identify which attempted
+// coordinate has just been proven invalid.
 Position Agent::getForwardPosition(
     Position position,
     Direction direction
@@ -335,8 +398,4 @@ Position Agent::getForwardPosition(
     }
 
     return position;
-}
-
-bool Agent::knowsValid(Position position) const {
-    return knowledgeBase.isKnownValid(position);
 }
