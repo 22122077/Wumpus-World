@@ -9,7 +9,7 @@
 
 
 // Converts each action into readable output for observing Agent behavior.
-const char* actionToString(Action action) {
+const char *actionToString(Action action) {
     switch (action) {
         case Action::Forward:
             return "Forward";
@@ -26,6 +26,61 @@ const char* actionToString(Action action) {
     }
 
     return "Unknown";
+}
+
+// Converts each direction into readable output for observing Agent behavior.
+const char *directionToString(Direction direction) {
+    switch (direction) {
+        case Direction::North:
+            return "North";
+        case Direction::East:
+            return "East";
+        case Direction::South:
+            return "South";
+        case Direction::West:
+            return "West";
+    }
+
+    return "Unknown";
+}
+
+// Displays the percept currently available to Agent.
+// Multiple percepts may be present at the same time.
+void printPercept(const Percept &percept) {
+    std::cout << "Percept:";
+
+    bool hasPercept = false;
+
+    if (percept.stench) {
+        std::cout << " Stench";
+        hasPercept = true;
+    }
+
+    if (percept.breeze) {
+        std::cout << " Breeze";
+        hasPercept = true;
+    }
+
+    if (percept.glitter) {
+        std::cout << " Glitter";
+        hasPercept = true;
+    }
+
+    if (percept.bump) {
+        std::cout << " Bump";
+        hasPercept = true;
+    }
+
+    if (percept.scream) {
+        std::cout << " Scream";
+        hasPercept = true;
+    }
+
+    if (!hasPercept) {
+        std::cout << " None";
+    }
+
+    std::cout << std::endl;
 }
 
 
@@ -83,6 +138,8 @@ int main() {
     // Each cycle follows the Agent loop:
     // perceive/reason -> choose action -> execute -> receive new percept.
     while (!gameOver && agent.isAlive()) {
+        printPercept(percept);
+
         Action action = agent.chooseAction(
             percept,
             search
@@ -115,7 +172,9 @@ int main() {
                 << currentPosition.x
                 << ","
                 << currentPosition.y
-                << "]  Score: "
+                << "]  Direction: "
+                << directionToString(agent.getDirection())
+                << "  Score: "
                 << agent.getScore()
                 << std::endl;
 
