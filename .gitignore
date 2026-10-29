@@ -1,2 +1,6 @@
 .idea/
 cmake-build-*/
+build/
+Wumpus_World
+Wumpus_World.exe
+.DS_Store
